@@ -1,24 +1,24 @@
 # AI Language Tutor Bot
 
-Персональный Telegram-бот для изучения любого иностранного языка (от A2 до C1). Бот выступает в роли строгого репетитора, который помогает расширять словарный запас, тренировать построение предложений и исправлять грамматику в режиме реального времени. Языки настраиваются через переменные окружения!
+Personal Telegram bot for learning any foreign language (from A2 to C1). The bot acts as a strict tutor, helping to expand vocabulary, practice sentence construction, and correct grammar in real time. Languages are configured via environment variables!
 
-##  Основные функции
-- **Vocabulary Boost:** Бот достает 3 случайных слова из личной базы пользователя и просит составить с ними одно сложное предложение на изучаемом языке.
-- **Sentence Builder:** Бот генерирует сложную фразу на вашем родном языке и просит перевести ее на изучаемый без подсказок, жестко оценивая порядок слов и грамматику.
-- **Free Chat (Режим добавления слов):** Любое отправленное слово переводится, добавляется в базу данных пользователя вместе с примером сложного предложения, а затем бот просит перевести похожую фразу для закрепления.
-- **Multi-user Isolation:** Бот поддерживает неограниченное число учеников. Каждое слово в базе привязывается к уникальному `telegram_id` человека, добавляющего его. Чужие слова не перемешиваются на тренировках.
+## Key Features
+- **Vocabulary Boost:** The bot pulls 3 random words from the user's personal database and asks to form one complex sentence with them in the target language.
+- **Sentence Builder:** The bot generates a complex phrase in your native language and asks to translate it into the target language without hints, strictly evaluating word order and grammar.
+- **Free Chat (Word Addition Mode):** Any sent word is translated, added to the user's database along with an example of a complex sentence, and then the bot asks to translate a similar phrase for reinforcement.
+- **Multi-user Isolation:** The bot supports an unlimited number of students. Each word in the database is tied to a unique `telegram_id` of the person adding it. Other users' words do not mix during training.
 
-##  Архитектура проекта
-Проект построен на 100% бесплатном стеке технологий:
-1. **Python 3** + `python-telegram-bot` (Логика и связь с мессенджером).
-2. **Google Gemini API** (AI-движок, системный промпт "строгого репетитора").
-3. **Supabase (PostgreSQL)** (Облачная база данных для постоянного хранения слов).
-4. **Flask** (Фоновый dummy-веб-сервер внутри скрипта для удержания активного статуса в облаке).
-5. **Render.com** (Бесплатный хостинг сервера "Free Web Service").
-6. **Cron-job.org** ("Пинговалка", которая каждые 14 минут дергает сервер Render по HTTP, чтобы он не засыпал).
+## Project Architecture
+The project is built on a 100% free technology stack:
+1. **Python 3** + `python-telegram-bot` (Logic and messenger connection).
+2. **Google Gemini API** (AI engine, with a "strict tutor" system prompt).
+3. **Supabase (PostgreSQL)** (Cloud database for persistent word storage).
+4. **Flask** (Background dummy web server inside the script to keep active status in the cloud).
+5. **Render.com** (Free server hosting "Free Web Service").
+6. **Cron-job.org** ("Pinger" that pings the Render server via HTTP every 14 minutes to prevent it from sleeping).
 
-##  Структура БД (Supabase SQL)
-Для работы бота необходима таблица `words` со следующими колонками:
+## Database Structure (Supabase SQL)
+For the bot to work, a `words` table is required with the following columns:
 ```sql
 CREATE TABLE words (
   id uuid default uuid_generate_v4() primary key,
@@ -31,40 +31,40 @@ CREATE TABLE words (
 );
 ```
 
-##  Локальный запуск (Local Setup)
-Для разработки и локального запуска необходимо создать в корне проекта файл `.env` со следующими ключами:
+## Local Setup
+For development and local launch, create a `.env` file in the project root with the following keys:
 ```env
-TELEGRAM_TOKEN=твой_токен_бота_от_BotFather
-GEMINI_API_KEY=твой_ключ_от_Google_AI_Studio
-SUPABASE_URL=твоя_ссылка_вида_https://xxxx.supabase.co
-SUPABASE_KEY=твой_длинный_jwt_токен_supabase
-NATIVE_LANGUAGE=Русский
-TARGET_LANGUAGE=Словацкий
+TELEGRAM_TOKEN=your_bot_token_from_BotFather
+GEMINI_API_KEY=your_key_from_Google_AI_Studio
+SUPABASE_URL=your_link_like_https://xxxx.supabase.co
+SUPABASE_KEY=your_long_supabase_jwt_token
+NATIVE_LANGUAGE=Russian
+TARGET_LANGUAGE=Slovak
 ```
 
-Установка зависимостей и запуск:
+Install dependencies and run:
 ```bash
 pip install -r requirements.txt
 python src/main.py
 ```
 
-##  Деплой (Как сделать бота независимым от ПК 24/7)
-Чтобы бот работал круглосуточно даже когда ваш компьютер выключен, мы используем связку из двух бесплатных сервисов: **Render.com** (для хостинга кода) и **Cron-job.org** (чтобы бесплатный сервер не "засыпал" от бездействия).
+## Deployment (Make the Bot Independent 24/7)
+To make the bot run around the clock even when your computer is off, we use a combo of two free services: **Render.com** (for hosting the code) and **Cron-job.org** (to prevent the free server from "sleeping" due to inactivity).
 
-**Шаг 1. Развертывание на Render.com**
-1. Зарегистрируйтесь на [Render.com](https://render.com) (можно войти через GitHub).
-2. Создайте новый **Web Service** и подключите ваш репозиторий с GitHub.
-3. В настройках сервиса укажите:
+**Step 1. Deploy on Render.com**
+1. Register at [Render.com](https://render.com) (can log in via GitHub).
+2. Create a new **Web Service** and connect your GitHub repository.
+3. In the service settings, specify:
    - **Environment:** `Python 3`
    - **Build Command:** `pip install -r requirements.txt`
    - **Start Command:** `python src/main.py`
-4. Перейдите во вкладку **Environment** и добавьте все переменные из вашего файла `.env` (токены, ключи и языки).
-5. Нажмите **Deploy**. Через пару минут бот запустится! Скопируйте ссылку на ваш сервис (например, `https://ваше-имя-бота.onrender.com`).
+4. Go to the **Environment** tab and add all variables from your `.env` file (tokens, keys, and languages).
+5. Click **Deploy**. In a couple of minutes, the bot will launch! Copy the link to your service (e.g., `https://your-bot-name.onrender.com`).
 
-**Шаг 2. Защита от "засыпания" с помощью Cron-job.org**
-Бесплатные серверы Render засыпают, если к ним нет обращений 15 минут (для этого в коде встроен фиктивный веб-сервер Flask).
-1. Зарегистрируйтесь на [Cron-job.org](https://cron-job.org).
-2. Создайте новую задачу (Create Cronjob).
-3. В поле URL вставьте скопированную ссылку на ваш Render-сервис (просто главную страницу `https://...`).
-4. Настройте расписание: **Every 14 minutes**.
-5. Сохраните. Теперь cron-job будет каждые 14 минут "пинговать" вашего бота, и он будет работать абсолютно автономно и бесплатно 24/7!
+**Step 2. Protection Against "Sleeping" with Cron-job.org**
+Free Render servers sleep if no requests come in for 15 minutes (that's why a dummy Flask web server is built into the code).
+1. Register at [Cron-job.org](https://cron-job.org).
+2. Create a new job (Create Cronjob).
+3. In the URL field, paste the copied link to your Render service (just the main page `https://...`).
+4. Set the schedule: **Every 14 minutes**.
+5. Save. Now the cron-job will ping your bot every 14 minutes, and it will work completely autonomously and free 24/7!
